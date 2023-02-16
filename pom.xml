@@ -15,8 +15,12 @@
 
 		<app.runtime>4.4.0-20220420</app.runtime>
 		<mule.maven.plugin.version>3.5.4</mule.maven.plugin.version>
-	</properties>
 
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
+		<aws.sdk.version>1.12.125</aws.sdk.version>
+		<log4j.version>2.18.0</log4j.version>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -46,6 +50,24 @@
 			<version>1.2.2</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
+
+
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-java-sdk-logs</artifactId>
+			<version>${aws.sdk.version}</version>
+		</dependency> 
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+ 
 	</dependencies>
 
 	<repositories>
