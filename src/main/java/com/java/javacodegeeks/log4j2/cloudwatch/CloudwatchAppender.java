@@ -3,8 +3,16 @@ package com.java.javacodegeeks.log4j2.cloudwatch;
 import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.toList;
 
+import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +59,9 @@ public class CloudwatchAppender extends AbstractAppender {
 	 
 	 private final Boolean DEBUG_MODE = System.getProperty("log4j.debug") != null;
 	 
+	 // sh98 begin
+	 private final Path MY_FILE_PATH = new File("/tmp/my-file-log.log").toPath();
+	 // sh98 end
 	    /**
 	     * Used to make sure that on close() our daemon thread isn't also trying to sendMessage()s
 	     */
@@ -214,9 +225,17 @@ public class CloudwatchAppender extends AbstractAppender {
 	                            inputLogEvents);
 	 
 	                    try {
+		                    // sh98 begin
+		                    String myMsg = String.format("%s inputLogEvents.size()=%d\n", DateTimeFormatter.ISO_INSTANT.format(Instant.now()), inputLogEvents.size());
+		                    Files.write(MY_FILE_PATH, myMsg.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		                    // sh98 end
 	                        putLogEventsRequest.setSequenceToken((String)lastSequenceToken.get());
 	                        PutLogEventsResult result = awsLogsClient.putLogEvents(putLogEventsRequest);
 	                        lastSequenceToken.set(result.getNextSequenceToken());
+		                    // sh98 begin
+		                    String myMsg2 = String.format("%s result.getRejectedLogEventsInfo()=%s %s\n", DateTimeFormatter.ISO_INSTANT.format(Instant.now()), result.getRejectedLogEventsInfo(), result.getSdkHttpMetadata().getAllHttpHeaders());
+		                    Files.write(MY_FILE_PATH, myMsg2.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+		                    // sh98 end
 	                    } catch (DataAlreadyAcceptedException dataAlreadyAcceptedExcepted) {
 	                      
 	                        putLogEventsRequest.setSequenceToken(dataAlreadyAcceptedExcepted.getExpectedSequenceToken());
@@ -225,6 +244,10 @@ public class CloudwatchAppender extends AbstractAppender {
 	                        if (DEBUG_MODE) {
 	                            dataAlreadyAcceptedExcepted.printStackTrace();
 	                        }
+	                        // sh98 begin
+	                        String myMsg = String.format("%s Exception: %s\n%s\n", DateTimeFormatter.ISO_INSTANT.format(Instant.now()), dataAlreadyAcceptedExcepted.toString());
+	                     	Files.write(MY_FILE_PATH, myMsg.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+	                     	// sh98 end
 	                    } catch (InvalidSequenceTokenException invalidSequenceTokenException) {
 	                        putLogEventsRequest.setSequenceToken(invalidSequenceTokenException.getExpectedSequenceToken());
 	                        PutLogEventsResult result = awsLogsClient.putLogEvents(putLogEventsRequest);
@@ -232,6 +255,10 @@ public class CloudwatchAppender extends AbstractAppender {
 	                        if (DEBUG_MODE) {
 	                            invalidSequenceTokenException.printStackTrace();
 	                        }
+	                        // sh98 begin
+	                        String myMsg = String.format("%s Exception: %s\n%s\n", DateTimeFormatter.ISO_INSTANT.format(Instant.now()), invalidSequenceTokenException.toString());
+	                     	Files.write(MY_FILE_PATH, myMsg.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+	                     	// sh98 end
 	                    }
 	                }
 	            } catch (Exception e) {
@@ -239,6 +266,14 @@ public class CloudwatchAppender extends AbstractAppender {
 	                 logger2.error(" error inserting cloudwatch:",e);
 	                    e.printStackTrace();
 	                }
+                    // sh98 begin
+                    try {
+                        String myMsg = String.format("%s Exception: %s\n%s\n", DateTimeFormatter.ISO_INSTANT.format(Instant.now()), e.toString(), Arrays.toString(e.getStackTrace()));
+                    	Files.write(MY_FILE_PATH, myMsg.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+                    } catch (IOException ioe) {
+                    	// give up. do nothing.
+                    }
+                    // sh98 end
 	            }
 	        }
 	    }
