@@ -1,5 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd"></mule>
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener8081_config" doc:name="HTTP Listener config" doc:id="7ce8c591-55ce-4196-b33e-27d92090e9e9" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:listener-config name="HTTP_Listener8091_config" doc:name="HTTP Listener config" doc:id="12591790-3f1f-4440-8fe9-c32977b6b1d9" >
+		<http:listener-connection host="0.0.0.0" port="8091" />
+	</http:listener-config>
+	<flow name="port8081-listnerFlow" doc:id="14711dfe-9a9d-437b-8f7e-75beefc1a51b" >
+		<http:listener doc:name="Listener" doc:id="24d792bb-b3a8-400d-9cc5-0819d9a706b7" config-ref="HTTP_Listener8081_config" path="/"/>
+		<logger level="INFO" doc:name="Logger" doc:id="224c78dc-7f05-46cc-b26a-d50428e1912f" message="port8081"/>
+		<flow-ref doc:name="Flow Reference" doc:id="67f880a9-bae3-4047-9010-82929550d51e" name="mainFlow"/>
+	</flow>
+	<flow name="port8091-listnerFlow" doc:id="8cffd433-eb22-47a8-8ca8-f0697665a916" >
+		<http:listener doc:name="Listener" doc:id="77689838-38a5-4ec3-863e-ee8f0ec7f934" config-ref="HTTP_Listener8091_config" path="/"/>
+		<logger level="INFO" doc:name="Logger" doc:id="3225c560-1e26-4e85-a0a4-12365949de80" message="#[attributes]"/>
+		<flow-ref doc:name="Flow Reference" doc:id="2e2486b5-cb55-417b-9231-5eaacd94be3d" name="mainFlow"/>
+	</flow>
+	<flow name="mainFlow" doc:id="d4f9798d-e5d5-43bb-abbf-150c43c1aa1e" >
+		<set-variable value="#[attributes.queryParams.countOfLogRecord as Number default 1024]" doc:name="" doc:id="47524068-1b7b-4590-8a6a-4e4d0bff1d29" variableName="countOfLogRecord"/>
+		<set-variable value="#[attributes.queryParams.bytePerLogRecord as Number default 1024]" doc:name="" doc:id="a5c45ec2-43f3-498a-b4a5-c738b35fc1f0" variableName="bytePerLogRecord"/>
+		<logger level="INFO" doc:name="Logger" doc:id="fe08c5c9-8abf-4743-a96a-a35553497441" message='#[output application/json indent=false --- {msg:"loop begin",  countOfLogRecord:vars.countOfLogRecord, bytePerLogRecord:vars.bytePerLogRecord}]'/>
+		<foreach doc:name="For Each" doc:id="c2df1390-ab4b-4e0d-8012-e7606c596bae" collection="#[1 to vars.countOfLogRecord]">
+			<logger level="INFO" doc:name="Logger" doc:id="28e64e0e-23a7-4cdc-8993-ba91abe22b41" message='#[dw::core::Strings::substring(vars.counter as Number ++ ":" ++ dw::core::Strings::repeat("x", vars.bytePerLogRecord), 0, vars.bytePerLogRecord)]'/>
+		</foreach>
+		<logger level="INFO" doc:name="Logger" doc:id="e8c2494e-8d30-4067-98c4-ff323d6bca70" message='#[output application/json indent=false --- {msg:"loop end",  countOfLogRecord:vars.countOfLogRecord, bytePerLogRecord:vars.bytePerLogRecord}]'/>
+	</flow>
+</mule>
