@@ -15,11 +15,11 @@
             <SizeBasedTriggeringPolicy size="10 MB"/>
             <DefaultRolloverStrategy max="10"/>
         </RollingFile>
-		<CLOUDW name="CloudW" logGroupName="<your CloudWatch group name>"
-			logStreamName="<your Mule app name>-${sys:environment}"
-			awsAccessKey="<your AWS access key>" 
-	        awsSecretKey="<your AWS secret key>"
-			awsRegion="<your AWS region>" 
+		<CLOUDW name="CloudW" logGroupName="${env:cloudwatch_log_group:-my-mule-app-lg}"
+			logStreamName="${env:cloudwatch_log_stream:-my-mule-app-ls}"
+			awsAccessKey="${env:cloudwatch_access_key}" 
+	        awsSecretKey="${env:cloudwatch_secret_key}"
+			awsRegion="${env:cloudwatch_reagion:-ap-northeast-1}" 
 			messagesBatchSize="5"
 			queueLength="100">
 			<PatternLayout
