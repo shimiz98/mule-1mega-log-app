@@ -20,8 +20,9 @@
 			awsAccessKey="${env:cloudwatch_access_key}" 
 	        awsSecretKey="${env:cloudwatch_secret_key}"
 			awsRegion="${env:cloudwatch_reagion:-ap-northeast-1}" 
-			messagesBatchSize="5"
-			queueLength="100">
+			messagesBatchSize="65536"
+			queueLength="65536"
+			sleepTime="2000">
 			<PatternLayout
 				pattern="%-5p %d [%t] %X{correlationId}%c: %m%n" /> 
 		</CLOUDW>
@@ -37,7 +38,7 @@
         <AsyncLogger name="org.mule.runtime.core.internal.processor.LoggerMessageProcessor" level="INFO"/>
 
         <AsyncRoot level="INFO">
-            <AppenderRef ref="file"/>
+            <!-- <AppenderRef ref="file"/> -->
             <AppenderRef ref="CloudW"/>
         </AsyncRoot>
     </Loggers>
