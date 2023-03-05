@@ -137,8 +137,18 @@ public class CloudwatchAppender extends AbstractAppender {
 	 
 	    @Override
 	    public void append(LogEvent event) {
-	      if (cloudwatchAppenderInitialised.get()) {
-	             loggingEventsQueue.offer(event.toImmutable());
+	        if (cloudwatchAppenderInitialised.get()) {
+	          boolean isAdded = loggingEventsQueue.offer(event.toImmutable());
+	          if (!isAdded) {
+	            // sh98 begin
+	            try {
+	              String myMsg = String.format("%s\tloggingEventsQueue is FULL\tloggingEventsQueue\t%d\n", DateTimeFormatter.ISO_INSTANT.format(Instant.now()), loggingEventsQueue.size());
+	              Files.write(MY_FILE_PATH, myMsg.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+	            } catch (IOException e) {
+	              // give up. do nothing
+	            }
+	            // sh98 end
+	          }
 	         } else {
 	             // just do nothing
 	         }
@@ -201,6 +211,21 @@ public class CloudwatchAppender extends AbstractAppender {
 	 
 	            try {
 	                while (loggingEvents.size() < messagesBatchSize && (polledLoggingEvent = (LogEvent) loggingEventsQueue.poll()) != null) {
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
+	                    loggingEvents.add(polledLoggingEvent);
 	                    loggingEvents.add(polledLoggingEvent);
 	                }
 	               
